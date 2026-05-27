@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+venv/
+data/truco/*.csv
+data/truco/*.json
+data/domino/*.csv
+data/domino/*.json
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/
