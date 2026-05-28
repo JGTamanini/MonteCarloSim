@@ -6,8 +6,10 @@ __pycache__/
 venv/
 data/truco/*.csv
 data/truco/*.json
+data/truco/graficos/*.png
 data/domino/*.csv
 data/domino/*.json
+data/domino/graficos/*.png
 .ipynb_checkpoints/
 *.egg-info/
 dist/
