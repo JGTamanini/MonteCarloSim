@@ -1,14 +1,17 @@
 import sys, os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from truco.analise.graficos import (
+from analise.graficos import (
     gerar_grafico_vitorias,
     gerar_grafico_blefe_vs_forca,
     gerar_grafico_vitoria_com_blefe
 )
 
-DATA_DIR = "data/truco"
-OUTPUT_DIR = "data/truco/graficos"
+DATA_DIR = os.path.join(BASE_DIR, "data", "truco")
+OUTPUT_DIR = os.path.join(BASE_DIR, "data", "truco", "graficos")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 confrontos = [

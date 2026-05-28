@@ -3,14 +3,20 @@
 Simulação de Monte Carlo aplicada ao **Truco Paulista** e ao **Dominó**,
 analisando o impacto de diferentes estratégias e o papel da sorte vs. habilidade.
 
-## Estrutura
+## Pergunta central
+> Blefar de forma constante e agressiva vale a pena a longo prazo?
 
+## Estrutura
 ```
 esportes-de-bar/
-├── truco/         # Simulação do Truco Paulista
-├── domino/        # Simulação do Dominó (duplas, 28 peças)
-├── data/          # Resultados das simulações (gerado automaticamente)
-└── notebooks/     # Análise e visualização dos resultados
+├── truco/
+│   ├── src/          # Lógica do jogo (carta, baralho, mão, rodada, partida)
+│   ├── simulacao/    # Runner da simulação Monte Carlo
+│   └── analise/      # Geração de gráficos
+├── domino/           # Em desenvolvimento
+├── data/
+│   └── truco/        # CSVs e gráficos gerados automaticamente
+└── gerar_graficos.py # Gera todos os gráficos
 ```
 
 ## Como rodar
@@ -22,20 +28,27 @@ pip install -r requirements.txt
 # Rodar simulação do truco
 python truco/simulacao/runner.py
 
-# Rodar simulação do dominó
-python domino/simulacao/runner.py
+# Gerar gráficos
+python truco/gerar_graficos.py
 ```
 
-## Agentes implementados
+## Agentes — Truco
+| Agente | Estratégia |
+|---|---|
+| Aleatório | Baseline — decisões ao acaso |
+| Conservador | Só arrisca com mão forte (limiar configurável) |
+| Agressivo | Blefa com frequência (chance configurável) |
+| Probabilístico | Estima força do adversário pelas cartas restantes |
 
-### Truco
-- **Aleatório** — baseline, decisões ao acaso
-- **Conservador** — só arrisca com mão forte
-- **Agressivo** — blefa com frequência
-- **Probabilístico** — estima força relativa da mão
+## Confrontos simulados (1000 partidas cada)
+| Confronto | Vencedor | Taxa |
+|---|---|---|
+| Conservador vs Aleatório | Conservador | 81.8% |
+| Agressivo vs Aleatório | Agressivo | 77.1% |
+| Conservador vs Agressivo | Conservador | 55.3% |
+| Probabilístico vs Agressivo | Probabilístico | 85.2% |
 
-### Dominó
-- **Aleatório** — baseline, joga peça válida ao acaso
-- **Ofensivo** — fecha pontas para bloquear o adversário
-- **Defensivo** — segura peças pesadas para o fim
-- **Probabilístico** — deduz peças do adversário pela mesa
+## Principais conclusões
+- Qualquer estratégia supera o jogo aleatório
+- Blefar contra um jogador analítico é altamente desvantajoso
+- O agente probabilístico domina todos os confrontos
