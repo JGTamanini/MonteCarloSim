@@ -14,10 +14,8 @@ def rodar_simulacao(n_partidas, dupla_a, dupla_b, nome_confronto=None):
     historico_completo = []
 
     for i in range(n_partidas):
-        # Recria as duplas a cada partida para resetar pontos
         da = Dupla(dupla_a[0], dupla_a[1])
         db = Dupla(dupla_b[0], dupla_b[1])
-
         partida = Partida(da, db)
         partida.jogar()
 
@@ -42,7 +40,7 @@ def rodar_simulacao(n_partidas, dupla_a, dupla_b, nome_confronto=None):
     if nome_confronto is None:
         nome_confronto = f"{dupla_a[0].nome}+{dupla_a[1].nome}_vs_{dupla_b[0].nome}+{dupla_b[1].nome}"
 
-    df = pd.DataFrame(resultados)
+    df          = pd.DataFrame(resultados)
     df_historico = pd.DataFrame(historico_completo)
     df.to_csv(os.path.join(DATA_DIR, f"confronto_{nome_confronto}_resultados.csv"), index=False)
     df_historico.to_csv(os.path.join(DATA_DIR, f"confronto_{nome_confronto}_historico.csv"), index=False)
@@ -57,27 +55,24 @@ if __name__ == "__main__":
     from domino.src.agentes.probabilistico import AgenteProbabilistico
 
     confrontos = [
-        # (dupla_a, dupla_b, nome)
-        (
-            [AgenteDefensivo("Def1"),  AgenteDefensivo("Def2")],
-            [AgenteAleatorio("Ale1"), AgenteAleatorio("Ale2")],
-            "Defensivo_vs_Aleatorio",
-        ),
-        (
-            [AgenteOfensivo("Ofe1"),  AgenteOfensivo("Ofe2")],
-            [AgenteAleatorio("Ale1"), AgenteAleatorio("Ale2")],
-            "Ofensivo_vs_Aleatorio",
-        ),
-        (
-            [AgenteDefensivo("Def1"), AgenteDefensivo("Def2")],
-            [AgenteOfensivo("Ofe1"),  AgenteOfensivo("Ofe2")],
-            "Defensivo_vs_Ofensivo",
-        ),
-        (
-            [AgenteProbabilistico("Prob1"), AgenteProbabilistico("Prob2")],
-            [AgenteOfensivo("Ofe1"),        AgenteOfensivo("Ofe2")],
-            "Probabilistico_vs_Ofensivo",
-        ),
+        ([AgenteOfensivo("Ofe1"),        AgenteOfensivo("Ofe2")],
+         [AgenteDefensivo("Def1"),       AgenteDefensivo("Def2")],
+         "Ofensivo_vs_Defensivo"),
+        ([AgenteOfensivo("Ofe1"),        AgenteOfensivo("Ofe2")],
+         [AgenteProbabilistico("Prob1"), AgenteProbabilistico("Prob2")],
+         "Ofensivo_vs_Probabilistico"),
+        ([AgenteOfensivo("Ofe1"),        AgenteOfensivo("Ofe2")],
+         [AgenteAleatorio("Ale1"),       AgenteAleatorio("Ale2")],
+         "Ofensivo_vs_Aleatorio"),
+        ([AgenteDefensivo("Def1"),       AgenteDefensivo("Def2")],
+         [AgenteProbabilistico("Prob1"), AgenteProbabilistico("Prob2")],
+         "Defensivo_vs_Probabilistico"),
+        ([AgenteDefensivo("Def1"),       AgenteDefensivo("Def2")],
+         [AgenteAleatorio("Ale1"),       AgenteAleatorio("Ale2")],
+         "Defensivo_vs_Aleatorio"),
+        ([AgenteProbabilistico("Prob1"), AgenteProbabilistico("Prob2")],
+         [AgenteAleatorio("Ale1"),       AgenteAleatorio("Ale2")],
+         "Probabilistico_vs_Aleatorio"),
     ]
 
     for dupla_a, dupla_b, nome in confrontos:
