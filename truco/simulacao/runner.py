@@ -6,7 +6,6 @@ import pandas as pd
 from truco.src.partida import Partida
 
 def rodar_simulacao(n_partidas, jogadores, nome_confronto=None):
-    import os
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATA_DIR = os.path.join(BASE_DIR, "..", "..", "data", "truco")
 
@@ -17,7 +16,6 @@ def rodar_simulacao(n_partidas, jogadores, nome_confronto=None):
         partida = Partida(jogadores)
         partida.jogar()
         
-        # resultado geral da partida
         resultados.append({
             "partida": i + 1,
             "vencedor": partida.vencedor.nome,
@@ -38,6 +36,7 @@ def rodar_simulacao(n_partidas, jogadores, nome_confronto=None):
     
     if nome_confronto is None:
         nome_confronto = f"{jogadores[0].nome}_vs_{jogadores[1].nome}"
+    
     df = pd.DataFrame(resultados)
     df_historico = pd.DataFrame(historico_completo)
     df.to_csv(os.path.join(DATA_DIR, f"confronto_{nome_confronto}_resultados.csv"), index=False)
@@ -52,11 +51,14 @@ if __name__ == "__main__":
     from truco.src.agentes.probabilistico import AgenteProbabilistico
 
     baralho = Baralho()
+
     confrontos = [
         [AgenteConservador("Conservador"), AgenteAleatorio("Aleatório")],
         [AgenteAgressivo("Agressivo"), AgenteAleatorio("Aleatório")],
         [AgenteConservador("Conservador"), AgenteAgressivo("Agressivo")],
         [AgenteProbabilistico("Probabilístico", baralho), AgenteAgressivo("Agressivo")],
+        [AgenteProbabilistico("Probabilístico", baralho), AgenteConservador("Conservador")],
+        [AgenteProbabilistico("Probabilístico", baralho), AgenteAleatorio("Aleatório")],
     ]
 
     for confronto in confrontos:
