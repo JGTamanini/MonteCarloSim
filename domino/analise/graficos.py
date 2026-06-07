@@ -107,8 +107,8 @@
 
 #     patches = [mpatches.Patch(color=_cor(s), label=s)
 #                for s in ["Aleatório", "Defensivo", "Ofensivo", "Probabilístico"]]
-#     ax.legend(handles=patches, loc="lower right", fontsize=10,
-#               framealpha=0.9, edgecolor="#cccccc")
+#     fig.legend(handles=patches, loc="lower center", ncol=4, fontsize=10,
+#                framealpha=0.9, edgecolor="#cccccc", bbox_to_anchor=(0.5, -0.04))
 
 #     plt.tight_layout()
 #     plt.savefig(os.path.join(output_dir, "grafico_vitorias.png"), dpi=180, bbox_inches="tight")
@@ -123,55 +123,52 @@
 #     COR_BATIDA   = "#2A9D8F"
 #     COR_TRANCADO = "#E63946"
 
-#     n = len(nomes_confronto)
-#     ncols = 3
-#     nrows = (n + ncols - 1) // ncols  # ceil
-
-#     fig, axes = plt.subplots(nrows, ncols, figsize=(13, 5 * nrows))
-#     axes_flat = axes.flatten() if nrows > 1 else list(axes) if ncols > 1 else [axes]
-#     fig.patch.set_facecolor("white")
-#     fig.suptitle("Como as rodadas terminam?\nBatida vs Trancamento por confronto",
-#                  fontsize=15, fontweight="bold", color="#222222", y=1.02)
-
-#     for idx, (arq, nome) in enumerate(zip(arquivos_historico, nomes_confronto)):
-#         ax = axes_flat[idx]
-#         if not os.path.exists(arq):
-#             print(f"⚠️  Arquivo não encontrado: {arq}")
-#             ax.axis("off")
-#             continue
-
-#         df    = pd.read_csv(arq)
-#         tot   = len(df)
-#         trap  = (df["motivo"] == "trancado").sum()
-#         pct_t = trap / tot * 100
-#         pct_b = 100 - pct_t
-
-#         ax.pie([pct_b, pct_t],
-#                colors=[COR_BATIDA, COR_TRANCADO],
-#                startangle=90,
-#                wedgeprops=dict(width=0.55, edgecolor="white", linewidth=2))
-#         ax.text(0,  0.08, f"{pct_t:.0f}%", ha="center", va="center",
-#                 fontsize=20, fontweight="bold", color=COR_TRANCADO)
-#         ax.text(0, -0.22, "trancado", ha="center", va="center",
-#                 fontsize=10, color="#666666")
-
-#         titulo = ROTULOS.get(nome, nome).replace("  vs  ", "\nvs\n")
-#         ax.set_title(titulo, fontsize=10.5, fontweight="bold", color="#333333", pad=10)
-
-#     # esconde eixos sobressalentes
-#     for idx in range(len(nomes_confronto), len(axes_flat)):
-#         axes_flat[idx].axis("off")
-
 #     leg = [mpatches.Patch(color=COR_BATIDA,   label="Batida (alguém esvazia a mão)"),
 #            mpatches.Patch(color=COR_TRANCADO, label="Trancado (ninguém consegue jogar)")]
-#     fig.legend(handles=leg, loc="lower center", ncol=2, fontsize=11,
-#                framealpha=0.9, edgecolor="#cccccc", bbox_to_anchor=(0.5, -0.04))
 
-#     plt.tight_layout()
-#     plt.savefig(os.path.join(output_dir, "grafico_trancamentos.png"),
-#                 dpi=180, bbox_inches="tight")
-#     plt.close()
-#     print("✅ grafico_trancamentos.png gerado")
+#     grupos = [
+#         (nomes_confronto[:3], arquivos_historico[:3], "1"),
+#         (nomes_confronto[3:], arquivos_historico[3:], "2"),
+#     ]
+
+#     for nomes, arquivos, sufixo in grupos:
+#         fig, axes = plt.subplots(1, 3, figsize=(13, 5))
+#         fig.patch.set_facecolor("white")
+#         fig.suptitle("Como as rodadas terminam?\nBatida vs Trancamento por confronto",
+#                      fontsize=15, fontweight="bold", color="#222222", y=1.02)
+
+#         for ax, arq, nome in zip(axes, arquivos, nomes):
+#             if not os.path.exists(arq):
+#                 print(f"⚠️  Arquivo não encontrado: {arq}")
+#                 ax.axis("off")
+#                 continue
+
+#             df    = pd.read_csv(arq)
+#             tot   = len(df)
+#             trap  = (df["motivo"] == "trancado").sum()
+#             pct_t = trap / tot * 100
+#             pct_b = 100 - pct_t
+
+#             ax.pie([pct_b, pct_t],
+#                    colors=[COR_BATIDA, COR_TRANCADO],
+#                    startangle=90,
+#                    wedgeprops=dict(width=0.55, edgecolor="white", linewidth=2))
+#             ax.text(0,  0.08, f"{pct_t:.0f}%", ha="center", va="center",
+#                     fontsize=20, fontweight="bold", color=COR_TRANCADO)
+#             ax.text(0, -0.22, "trancado", ha="center", va="center",
+#                     fontsize=10, color="#666666")
+
+#             titulo = ROTULOS.get(nome, nome).replace("  vs  ", "\nvs\n")
+#             ax.set_title(titulo, fontsize=10.5, fontweight="bold", color="#333333", pad=10)
+
+#         fig.legend(handles=leg, loc="lower center", ncol=2, fontsize=11,
+#                    framealpha=0.9, edgecolor="#cccccc", bbox_to_anchor=(0.5, -0.08))
+
+#         plt.tight_layout()
+#         plt.savefig(os.path.join(output_dir, f"grafico_trancamentos_{sufixo}.png"),
+#                     dpi=180, bbox_inches="tight")
+#         plt.close()
+#         print(f"✅ grafico_trancamentos_{sufixo}.png gerado")
 
 
 # # ══════════════════════════════════════════════════════════════════════════════
@@ -244,6 +241,30 @@
 #     print(f"✅ grafico_pontos_rodada_{nome_confronto}.png gerado")
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import os
 import pandas as pd
 import numpy as np
@@ -290,6 +311,8 @@ def _lum(hex_cor):
     g = int(hex_cor[3:5], 16) / 255
     b = int(hex_cor[5:7], 16) / 255
     return 0.299 * r + 0.587 * g + 0.114 * b
+
+PAD = 1.5  # borda externa padrão para todos os gráficos
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -341,7 +364,9 @@ def gerar_grafico_vitorias(arquivos_resultados, output_dir):
 
     ax.axvline(50, color="#888888", lw=1.2, ls="--", zorder=4)
     ax.set_yticks(range(len(rotulos_y)))
-    ax.set_yticklabels(rotulos_y, fontsize=12)
+    # rótulos quebrados em 3 linhas, "vs" centralizado
+    labels = [r.replace("  vs  ", "\nvs\n") for r in rotulos_y]
+    ax.set_yticklabels(labels, fontsize=12, linespacing=1.2, multialignment="center")
     ax.set_xlim(0, 100)
     ax.set_xlabel("Taxa de vitória (%)", fontsize=11, color="#555555")
     ax.set_title("Quem vence mais?\nTaxa de vitória por confronto — 1 000 partidas cada",
@@ -353,17 +378,18 @@ def gerar_grafico_vitorias(arquivos_resultados, output_dir):
 
     patches = [mpatches.Patch(color=_cor(s), label=s)
                for s in ["Aleatório", "Defensivo", "Ofensivo", "Probabilístico"]]
-    ax.legend(handles=patches, loc="lower right", fontsize=10,
-              framealpha=0.9, edgecolor="#cccccc")
+    fig.legend(handles=patches, loc="lower center", ncol=4, fontsize=10,
+               framealpha=0.9, edgecolor="#cccccc", bbox_to_anchor=(0.5, -0.04))
 
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, "grafico_vitorias.png"), dpi=180, bbox_inches="tight")
+    plt.savefig(os.path.join(output_dir, "grafico_vitorias.png"),
+                dpi=180, bbox_inches="tight", pad_inches=PAD)
     plt.close()
     print("✅ grafico_vitorias.png gerado")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Gráfico 2 — Donuts batida vs trancado (2 linhas de 3)
+# Gráfico 2 — Donuts batida vs trancado (2 arquivos de 3)
 # ══════════════════════════════════════════════════════════════════════════════
 def gerar_grafico_trancamentos(arquivos_historico, nomes_confronto, output_dir):
     COR_BATIDA   = "#2A9D8F"
@@ -412,13 +438,13 @@ def gerar_grafico_trancamentos(arquivos_historico, nomes_confronto, output_dir):
 
         plt.tight_layout()
         plt.savefig(os.path.join(output_dir, f"grafico_trancamentos_{sufixo}.png"),
-                    dpi=180, bbox_inches="tight")
+                    dpi=180, bbox_inches="tight", pad_inches=PAD)
         plt.close()
         print(f"✅ grafico_trancamentos_{sufixo}.png gerado")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Gráfico 3 — Boxplot força da mão vs motivo (antigo)
+# Gráfico 3 — Boxplot força da mão vs motivo
 # ══════════════════════════════════════════════════════════════════════════════
 def gerar_grafico_forca_vs_motivo(arquivo_historico, nome_confronto, output_dir):
     if not os.path.exists(arquivo_historico):
@@ -448,13 +474,13 @@ def gerar_grafico_forca_vs_motivo(arquivo_historico, nome_confronto, output_dir)
                  fontsize=14, fontweight="bold")
     plt.tight_layout()
     path = os.path.join(output_dir, f"grafico_forca_motivo_{nome_confronto}.png")
-    plt.savefig(path, dpi=150)
+    plt.savefig(path, dpi=150, bbox_inches="tight", pad_inches=PAD)
     plt.close()
     print(f"✅ grafico_forca_motivo_{nome_confronto}.png gerado")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Gráfico 4 — Histograma distribuição de pontos (antigo + cores fixas)
+# Gráfico 4 — Histograma distribuição de pontos
 # ══════════════════════════════════════════════════════════════════════════════
 def gerar_grafico_pontos_por_rodada(arquivo_historico, nome_confronto, output_dir):
     if not os.path.exists(arquivo_historico):
@@ -482,6 +508,21 @@ def gerar_grafico_pontos_por_rodada(arquivo_historico, nome_confronto, output_di
     ax.legend(title="Estratégia vencedora")
     plt.tight_layout()
     path = os.path.join(output_dir, f"grafico_pontos_rodada_{nome_confronto}.png")
-    plt.savefig(path, dpi=150)
+    plt.savefig(path, dpi=150, bbox_inches="tight", pad_inches=PAD)
     plt.close()
     print(f"✅ grafico_pontos_rodada_{nome_confronto}.png gerado")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
