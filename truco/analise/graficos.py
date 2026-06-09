@@ -129,24 +129,21 @@ def gerar_grafico_blefe_vs_forca(arquivo_historico, nome_confronto, output_dir):
         print(f"⚠️ Nenhuma coluna de força encontrada em {arquivo_historico}")
         return
 
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
-
-    for ax, coluna in zip(axes, colunas_forca[:2]):
+    for coluna in colunas_forca[:2]:
         nome_agente = coluna.replace("forca_", "")
+
+        fig, ax = plt.subplots(figsize=(7, 5))
         sns.boxplot(data=df, x="houve_blefe", y=coluna, ax=ax,
                     palette=["#4CAF50", "#F44336"])
-        ax.set_title(f"{nome_agente} — Força da Mão vs Blefe", fontsize=12)
+        ax.set_title(f"{nome_agente} — Força da Mão vs Blefe\n{nome_confronto}", fontsize=12)
         ax.set_xlabel("Houve Blefe?")
         ax.set_ylabel("Força Média da Mão")
         ax.set_xticklabels(["Não", "Sim"])
 
-    fig.suptitle(f"Força da Mão quando Houve Blefe\n{nome_confronto}",
-                 fontsize=14, fontweight="bold")
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"grafico_blefe_forca_{nome_confronto}.png"), dpi=150)
-    plt.close()
-    print(f"✅ grafico_blefe_forca_{nome_confronto}.png gerado")
-
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f"grafico_blefe_forca_{nome_confronto}_{nome_agente}.png"), dpi=150)
+        plt.close()
+        print(f"✅ grafico_blefe_forca_{nome_confronto}_{nome_agente}.png gerado")
 
 # =============================================
 # Gráfico 4 — Taxa de vitória com blefe vs sem blefe
