@@ -14,25 +14,40 @@ from truco.src.core.ambiente import AmbienteJogo
 from truco.src.events.event_bus import EventBus
 from truco.src.events import events
 from truco.src.agents.base_agent import AgenteBase
-from truco.src.core.state_machine import SetupState, DealState, RevealViraState, PlayerTurnState, TrucoDecisionState, MatchEndState
+from truco.src.core.state_machine import (
+    SetupState,
+    DealState,
+    RevealViraState,
+    PlayerTurnState,
+    TrucoDecisionState,
+    MatchEndState,
+)
 
 # Configuração básica de log para a aplicação
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("TrucoDemo")
 
+
 # Exceções customizadas para pausar a máquina de estados e aguardar input humano
 class AguardandoJogadaHumana(Exception):
     pass
 
+
 class AguardandoRespostaHumana(Exception):
     pass
 
+
 def obter_html_carta(carta, css_class=""):
     simbolos = {"copas": "♥️", "ouros": "♦️", "paus": "♣️", "espadas": "♠️"}
-    cores = {"copas": "#ef4444", "ouros": "#ef4444", "paus": "#3b82f6", "espadas": "#3b82f6"}
+    cores = {
+        "copas": "#ef4444",
+        "ouros": "#ef4444",
+        "paus": "#3b82f6",
+        "espadas": "#3b82f6",
+    }
     simbolo = simbolos.get(carta.naipe.lower(), "")
     cor = cores.get(carta.naipe.lower(), "#ffffff")
-    
+
     return f"""
     <div class="truco-card {css_class}" style="border: 2px solid {cor};">
         <div class="card-corner-top">{carta.valor}</div>
@@ -41,6 +56,7 @@ def obter_html_carta(carta, css_class=""):
     </div>
     """
 
+
 # Agente que representa o Humano e lê inputs da interface Streamlit
 class AgenteHumano(AgenteBase):
     def __init__(self, nome: str):
@@ -48,7 +64,10 @@ class AgenteHumano(AgenteBase):
 
     def decidir_acao(self, percepcao, pode_pedir_truco):
         # Verifica se o jogador selecionou uma jogada no Streamlit
-        if "jogada_humana" in st.session_state and st.session_state.jogada_humana is not None:
+        if (
+            "jogada_humana" in st.session_state
+            and st.session_state.jogada_humana is not None
+        ):
             jogada = st.session_state.jogada_humana
             st.session_state.jogada_humana = None
             return jogada
@@ -56,11 +75,15 @@ class AgenteHumano(AgenteBase):
 
     def responder_truco_proposto(self, percepcao, valor_proposto):
         # Verifica se o jogador escolheu uma resposta para o truco
-        if "resposta_humana" in st.session_state and st.session_state.resposta_humana is not None:
+        if (
+            "resposta_humana" in st.session_state
+            and st.session_state.resposta_humana is not None
+        ):
             resposta = st.session_state.resposta_humana
             st.session_state.resposta_humana = None
             return resposta
         raise AguardandoRespostaHumana()
+
 
 # Inicialização do estado do Streamlit
 if "partida_logs" not in st.session_state:
@@ -92,11 +115,12 @@ if "estrategia_anterior" not in st.session_state:
 st.set_page_config(
     page_title="MAS Truco Paulista — Demonstração",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Estilização CSS personalizada para um design dark e premium
-st.markdown("""
+st.markdown(
+    """
 <style>
     .main {
         background-color: #0f1116;
@@ -293,25 +317,48 @@ st.markdown("""
         font-size: 0.85rem;
         line-height: 1.4;
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Barra Lateral - Configuração do Agente Oponente
 st.sidebar.title("🤖 Configuração do Oponente")
 
 estrategia_selecionada = st.sidebar.selectbox(
     "Estratégia da IA:",
-    ["Híbrido", "Adaptativo", "Bayesiano", "Probabilístico", "Conservador", "Agressivo", "Blefador", "RiscoEvitador", "RiscoBuscador", "Aleatório"]
+    [
+        "Híbrido",
+        "Adaptativo",
+        "Bayesiano",
+        "Probabilístico",
+        "Conservador",
+        "Agressivo",
+        "Blefador",
+        "RiscoEvitador",
+        "RiscoBuscador",
+        "Aleatório",
+    ],
 )
 
 # Verifica se o oponente mudou para resetar a instância e reter a memória a longo prazo
-if st.session_state.estrategia_anterior != estrategia_selecionada or st.session_state.oponente_instancia is None:
+if (
+    st.session_state.estrategia_anterior != estrategia_selecionada
+    or st.session_state.oponente_instancia is None
+):
     st.session_state.estrategia_anterior = estrategia_selecionada
     from truco.src.agents.concrete_agents import (
-        AgenteAleatorio, AgenteConservador, AgenteAgressivo,
-        AgenteProbabilistico, AgenteAdaptativo, AgenteBlefador,
-        AgenteBayesiano, AgenteRiscoEvitador, AgenteRiscoBuscador,
-        AgenteHibrido
+        AgenteAleatorio,
+        AgenteConservador,
+        AgenteAgressivo,
+        AgenteProbabilistico,
+        AgenteAdaptativo,
+        AgenteBlefador,
+        AgenteBayesiano,
+        AgenteRiscoEvitador,
+        AgenteRiscoBuscador,
+        AgenteHibrido,
     )
+
     mapeamento = {
         "Aleatório": AgenteAleatorio,
         "Conservador": AgenteConservador,
@@ -322,11 +369,11 @@ if st.session_state.estrategia_anterior != estrategia_selecionada or st.session_
         "Bayesiano": AgenteBayesiano,
         "RiscoEvitador": AgenteRiscoEvitador,
         "RiscoBuscador": AgenteRiscoBuscador,
-        "Híbrido": AgenteHibrido
+        "Híbrido": AgenteHibrido,
     }
     classe_agente = mapeamento.get(estrategia_selecionada, AgenteAleatorio)
     st.session_state.oponente_instancia = classe_agente("IA_Oponente")
-    st.session_state.ambiente = None # Força recriação do ambiente
+    st.session_state.ambiente = None  # Força recriação do ambiente
     st.session_state.partida_logs = ["Agente oponente configurado com sucesso!"]
 
 # Placar Global
@@ -351,6 +398,7 @@ if st.sidebar.button("Iniciar Nova Partida / Reiniciar", type="primary"):
     st.session_state.ultima_explicacao_ia = None
     st.rerun()
 
+
 # Definições de callbacks globais executadas a cada rodada (para manter contexto do Streamlit atualizado)
 def registrar_log(event):
     msg = ""
@@ -358,55 +406,61 @@ def registrar_log(event):
         msg = "🎮 A PARTIDA COMEÇOU!"
         st.session_state.partida_logs.append(msg)
         st.session_state.maos_finalizadas_historico = []
-        
+
     elif isinstance(event, events.RoundStartedEvent):
         manilha_val = get_valor_manilha(event.vira.valor)
         msg = f"🆕 **Mão {event.numero_mao} Iniciada!** Vira: **{event.vira}** | Manilha: **{manilha_val}**"
         st.session_state.partida_logs.append(msg)
         st.session_state.quedas_historico_mao = []
         st.session_state.logs_mao_atual = [msg]
-        
+
     elif isinstance(event, events.CardPlayedEvent):
         msg = f"🃏 **{event.jogador}** jogou a carta **{event.carta}**"
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
     elif isinstance(event, events.TrucoRequestedEvent):
         msg = f"⚡ **{event.jogador}** pediu **TRUCO** (Aposta vale {event.valor_proposto} pontos!)"
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
     elif isinstance(event, events.TrucoAcceptedEvent):
-        msg = f"✅ **{event.jogador}** ACEITOU o Truco! Partida vale {event.novo_valor}."
+        msg = (
+            f"✅ **{event.jogador}** ACEITOU o Truco! Partida vale {event.novo_valor}."
+        )
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
     elif isinstance(event, events.TrucoRejectedEvent):
         msg = f"🏃 **{event.jogador}** CORREU do Truco!"
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
     elif isinstance(event, events.TrucoRaisedEvent):
         msg = f"🔥 **{event.jogador}** AUMENTOU o Truco de {event.valor_atual} para {event.valor_proposto}!"
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
     elif isinstance(event, events.QuedaFinishedEvent):
-        vencedor_traduzido = "Empate" if event.vencedor_queda == "Empate" else event.vencedor_queda
-        msg = f"🏁 **{event.numero_queda}ª Queda** vencida por: **{vencedor_traduzido}**"
+        vencedor_traduzido = (
+            "Empate" if event.vencedor_queda == "Empate" else event.vencedor_queda
+        )
+        msg = (
+            f"🏁 **{event.numero_queda}ª Queda** vencida por: **{vencedor_traduzido}**"
+        )
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
         st.session_state.quedas_historico_mao.append(event)
-        
+
     elif isinstance(event, events.RoundFinishedEvent):
         msg = f"🏁 **Fim da Mão {event.numero_mao}.** Vencedor da Mão: **{event.vencedor}** (+{event.pontos_ganhos} pts)"
         st.session_state.partida_logs.append(msg)
         st.session_state.logs_mao_atual.append(msg)
-        
+
         # Adiciona ao histórico de mãos finalizadas
         summary = f"Mão {event.numero_mao} -> Vencedora: {event.vencedor} (+{event.pontos_ganhos} pts). Placar: Humano {event.placar.get('Humano', 0)} x IA {event.placar.get('IA_Oponente', 0)}"
         st.session_state.maos_finalizadas_historico.append(summary)
-        
+
     elif isinstance(event, events.MatchFinishedEvent):
         msg = f"🏆 **FIM DA PARTIDA!** Vencedor da partida: **{event.vencedor}**"
         st.session_state.partida_logs.append(msg)
@@ -417,6 +471,7 @@ def registrar_log(event):
         else:
             st.session_state.placar_geral["IA"] += 1
 
+
 def capturar_xai(event: events.DecisionMadeEvent):
     if event.jogador == "IA_Oponente":
         st.session_state.ultima_explicacao_ia = {
@@ -424,8 +479,9 @@ def capturar_xai(event: events.DecisionMadeEvent):
             "forca_mao": event.forca_mao,
             "tempo_ms": event.tempo_ms,
             "motivo": event.motivo,
-            "estrategia": event.estrategia
+            "estrategia": event.estrategia,
         }
+
 
 # Instanciação do Ambiente
 if st.session_state.ambiente is None:
@@ -434,31 +490,52 @@ if st.session_state.ambiente is None:
     bus = EventBus()
     st.session_state.ambiente = AmbienteJogo([humano, ia], bus)
 
-# Re-inscreve os callbacks a cada execução para atualizar a referência da closure com o st.session_state ativo
-st.session_state.ambiente.event_bus._listeners.clear()
-st.session_state.ambiente.event_bus.subscribe(object, registrar_log)
-st.session_state.ambiente.event_bus.subscribe(events.DecisionMadeEvent, capturar_xai)
+# Re-inscreve os callbacks de UI a cada rerun.
+# Usa unsubscribe para evitar duplicação sem apagar handlers dos agentes.
+_bus = st.session_state.ambiente.event_bus
+_tipos_log = [
+    events.MatchStartedEvent,
+    events.RoundStartedEvent,
+    events.CardPlayedEvent,
+    events.TrucoRequestedEvent,
+    events.TrucoAcceptedEvent,
+    events.TrucoRejectedEvent,
+    events.TrucoRaisedEvent,
+    events.QuedaFinishedEvent,
+    events.RoundFinishedEvent,
+    events.MatchFinishedEvent,
+]
+for _t in _tipos_log:
+    _bus.unsubscribe(_t, registrar_log)
+    _bus.subscribe(_t, registrar_log)
+_bus.unsubscribe(events.DecisionMadeEvent, capturar_xai)
+_bus.subscribe(events.DecisionMadeEvent, capturar_xai)
 
 # Título Principal do App
 st.title("🃏 Truco Paulista Multiagentes — Humano vs IA")
-st.write("Jogue contra diferentes estratégias de agentes cognitivos providos de BeliefState, Inferência Bayesiana e XAI.")
+st.write(
+    "Jogue contra diferentes estratégias de agentes cognitivos providos de BeliefState, Inferência Bayesiana e XAI."
+)
+
 
 # Função para executar a Máquina de Estados passo a passo
 def processar_passo_jogo():
     amb = st.session_state.ambiente
     if amb._estado_atual is None:
         amb.definir_estado(SetupState())
-        
+
     try:
         while not isinstance(amb._estado_atual, MatchEndState):
             # Intercepta ANTES de avaliar o fim da queda para permitir que o usuário veja as duas cartas na mesa
-            if len(amb.cartas_jogadas_queda) == 2 and not st.session_state.get("confirmou_proxima_queda", False):
+            if len(amb.cartas_jogadas_queda) == 2 and not st.session_state.get(
+                "confirmou_proxima_queda", False
+            ):
                 return "proxima_queda"
-                
+
             # Se confirmou, reinicia a flag
             if st.session_state.get("confirmou_proxima_queda", False):
                 st.session_state.confirmou_proxima_queda = False
-                
+
             amb._estado_atual.processar(amb)
         # Executa o estado final se necessário
         amb._estado_atual.processar(amb)
@@ -472,8 +549,9 @@ def processar_passo_jogo():
             return "responder"
         else:
             raise e
-    
+
     return "fim"
+
 
 # Executa o jogo até travar em um input do Humano ou terminar
 estado_interacao = processar_passo_jogo()
@@ -497,19 +575,24 @@ with col_esq:
                 f"<span style='background-color:#065f46; color:#34d399; padding: 4px 10px; border-radius: 6px; font-weight:bold; font-size:0.9rem;'>Mão {amb.numero_mao}</span>"
                 f"<span style='background-color:#1e3a8a; color:#60a5fa; padding: 4px 10px; border-radius: 6px; font-weight:bold; font-size:0.9rem;'>Manilha: {manilha_val}</span>"
                 f"</div>",
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
-            
+
     # TABULEIRO PRINCIPAL (truco-board)
     st.markdown('<div class="truco-board">', unsafe_allow_html=True)
-    
+
     # 1. Linha do Oponente (CPU)
     col_cpu_lbl, col_cpu_cards = st.columns([1.5, 2.0])
     with col_cpu_lbl:
         if estado_interacao == "proxima_queda":
             status_cpu = "queda concluída"
         else:
-            status_cpu = "pensando..." if amb.obter_jogador_ativo().nome == "IA_Oponente" and estado_interacao != "fim" else "aguardando..."
+            status_cpu = (
+                "pensando..."
+                if amb.obter_jogador_ativo().nome == "IA_Oponente"
+                and estado_interacao != "fim"
+                else "aguardando..."
+            )
         st.markdown(
             f"<div style='display: flex; align-items: center; gap: 10px;'>"
             f"<span style='background-color:#450a0a; color:#ef4444; width:36px; height:36px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.2rem;'>🤖</span>"
@@ -518,19 +601,22 @@ with col_esq:
             f"<div style='font-size:0.8rem; color:#71717a;'>{status_cpu}</div>"
             f"</div>"
             f"</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
     with col_cpu_cards:
         n_cards_cpu = len(amb.maos_jogadores.get("IA_Oponente", []))
-        cards_html = "".join('<div class="card-back" style="margin-left: 5px;"></div>' for _ in range(n_cards_cpu))
+        cards_html = "".join(
+            '<div class="card-back" style="margin-left: 5px;"></div>'
+            for _ in range(n_cards_cpu)
+        )
         st.markdown(
             f"<div style='display:flex; justify-content:flex-end;'>{cards_html}</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-        
+
     # Espaçamento
     st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)
-    
+
     # 2. Mesa Central (Cartas Jogadas na Queda)
     col_mesa_cards, col_mesa_lbl = st.columns([2.0, 1.5])
     with col_mesa_cards:
@@ -538,48 +624,78 @@ with col_esq:
         with col_m_ia:
             if "IA_Oponente" in amb.cartas_jogadas_queda:
                 c = amb.cartas_jogadas_queda["IA_Oponente"]
-                st.markdown(obter_html_carta(c, css_class="mesa-card mesa-card-cpu"), unsafe_allow_html=True)
+                st.markdown(
+                    obter_html_carta(c, css_class="mesa-card mesa-card-cpu"),
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown("<div class='mesa-card-empty'></div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='mesa-card-empty'></div>", unsafe_allow_html=True
+                )
         with col_m_hum:
             if "Humano" in amb.cartas_jogadas_queda:
                 c = amb.cartas_jogadas_queda["Humano"]
-                st.markdown(obter_html_carta(c, css_class="mesa-card mesa-card-hum"), unsafe_allow_html=True)
+                st.markdown(
+                    obter_html_carta(c, css_class="mesa-card mesa-card-hum"),
+                    unsafe_allow_html=True,
+                )
             else:
-                st.markdown("<div class='mesa-card-empty'></div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div class='mesa-card-empty'></div>", unsafe_allow_html=True
+                )
     with col_mesa_lbl:
         col_vr, col_lbl_txt = st.columns([1.1, 1.0])
         with col_vr:
             if amb.vira:
-                st.markdown("<div style='font-size:0.75rem; font-weight:bold; color:#71717a; text-align:center; margin-bottom:2px;'>VIRA</div>", unsafe_allow_html=True)
+                st.markdown(
+                    "<div style='font-size:0.75rem; font-weight:bold; color:#71717a; text-align:center; margin-bottom:2px;'>VIRA</div>",
+                    unsafe_allow_html=True,
+                )
                 st.markdown(obter_html_carta(amb.vira), unsafe_allow_html=True)
         with col_lbl_txt:
-            st.markdown("<div style='line-height:105px; color:#52525b; font-weight:bold; font-size:1.1rem; padding-left:10px;'>mesa</div>", unsafe_allow_html=True)
-        
+            st.markdown(
+                "<div style='line-height:105px; color:#52525b; font-weight:bold; font-size:1.1rem; padding-left:10px;'>mesa</div>",
+                unsafe_allow_html=True,
+            )
+
     # Espaçamento
     st.markdown("<div style='margin: 25px 0;'></div>", unsafe_allow_html=True)
-    
+
     # 3. Linha do Jogador (Você)
     col_hum_cards, col_hum_lbl = st.columns([2.0, 1.5])
     with col_hum_cards:
         st.markdown('<div class="minha-mao-container">', unsafe_allow_html=True)
         mao_humano = amb.maos_jogadores.get("Humano", [])
         cols_cartas = st.columns(max(len(mao_humano), 1))
-        
+
         for idx, carta in enumerate(mao_humano):
             with cols_cartas[idx]:
                 st.markdown(obter_html_carta(carta), unsafe_allow_html=True)
-                btn_desabilitado = (estado_interacao != "jogar")
-                if st.button("Jogar", key=f"c_{idx}", disabled=btn_desabilitado, use_container_width=True):
+                btn_desabilitado = estado_interacao != "jogar"
+                if st.button(
+                    "Jogar",
+                    key=f"c_{idx}",
+                    disabled=btn_desabilitado,
+                    use_container_width=True,
+                ):
                     st.session_state.jogada_humana = (AcoesJogador.JOGAR_CARTA, carta)
                     st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+        st.markdown("</div>", unsafe_allow_html=True)
+
     with col_hum_lbl:
         if estado_interacao == "proxima_queda":
             status_hum = "queda concluída"
         else:
-            status_hum = "sua vez" if amb.obter_jogador_ativo().nome == "Humano" and estado_interacao == "jogar" else ("respondendo truco..." if estado_interacao == "responder" else "aguardando...")
+            status_hum = (
+                "sua vez"
+                if amb.obter_jogador_ativo().nome == "Humano"
+                and estado_interacao == "jogar"
+                else (
+                    "respondendo truco..."
+                    if estado_interacao == "responder"
+                    else "aguardando..."
+                )
+            )
         st.markdown(
             f"<div style='display: flex; align-items: center; gap: 10px; justify-content: flex-end; text-align: right; height: 105px;'>"
             f"<div>"
@@ -588,11 +704,11 @@ with col_esq:
             f"</div>"
             f"<span style='background-color:#1e3a8a; color:#3b82f6; width:36px; height:36px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.2rem;'>👤</span>"
             f"</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-        
-    st.markdown('</div>', unsafe_allow_html=True) # Fim do truco-board
-    
+
+    st.markdown("</div>", unsafe_allow_html=True)  # Fim do truco-board
+
     # 4. Placar dos dois lados
     col_pl_hum, col_pl_ia = st.columns(2)
     with col_pl_hum:
@@ -601,7 +717,7 @@ with col_esq:
             f"<div class='score-card-title'>Você</div>"
             f"<div class='score-card-value'>{p_humano}</div>"
             f"</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
     with col_pl_ia:
         st.markdown(
@@ -609,52 +725,80 @@ with col_esq:
             f"<div class='score-card-title'>Máquina</div>"
             f"<div class='score-card-value'>{p_ia}</div>"
             f"</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-        
+
     # 5. Botões de Ação no Rodapé (Pedir Truco, Correr, Log/Aumentar)
     st.markdown('<div class="botoes-acao">', unsafe_allow_html=True)
     col_act1, col_act2, col_act3 = st.columns(3)
-    
+
     with col_act1:
         if estado_interacao == "jogar":
             pode_pedir_truco = (
-                not amb.truco_pedido_nesta_mao or 
-                amb.proponente_truco != "Humano"
+                not amb.truco_pedido_nesta_mao or amb.proponente_truco != "Humano"
             ) and amb.valor_truco_atual < 12
-            if st.button("🔥 Pedir truco", key="btn_truco_bottom", disabled=not pode_pedir_truco, use_container_width=True):
+            if st.button(
+                "🔥 Pedir truco",
+                key="btn_truco_bottom",
+                disabled=not pode_pedir_truco,
+                use_container_width=True,
+            ):
                 st.session_state.jogada_humana = (AcoesJogador.PEDIR_TRUCO, None)
                 st.rerun()
         elif estado_interacao == "responder":
-            if st.button("✅ Aceitar Truco", key="btn_aceitar_bottom", use_container_width=True):
+            if st.button(
+                "✅ Aceitar Truco", key="btn_aceitar_bottom", use_container_width=True
+            ):
                 st.session_state.resposta_humana = RespostasTruco.ACEITAR
                 st.rerun()
         elif estado_interacao == "proxima_queda":
-            if st.button("▶️ Continuar", key="btn_continuar_bottom", type="primary", use_container_width=True):
+            if st.button(
+                "▶️ Continuar",
+                key="btn_continuar_bottom",
+                type="primary",
+                use_container_width=True,
+            ):
                 st.session_state.confirmou_proxima_queda = True
                 st.rerun()
         else:
-            st.button("🔥 Pedir truco", key="btn_truco_disabled", disabled=True, use_container_width=True)
-            
+            st.button(
+                "🔥 Pedir truco",
+                key="btn_truco_disabled",
+                disabled=True,
+                use_container_width=True,
+            )
+
     with col_act2:
         if estado_interacao == "responder":
             if st.button("🏳️ Correr", key="btn_correr_bottom", use_container_width=True):
                 st.session_state.resposta_humana = RespostasTruco.CORRER
                 st.rerun()
         else:
-            st.button("🏳️ Correr", key="btn_correr_disabled", disabled=True, use_container_width=True)
-            
+            st.button(
+                "🏳️ Correr",
+                key="btn_correr_disabled",
+                disabled=True,
+                use_container_width=True,
+            )
+
     with col_act3:
         if estado_interacao == "responder":
             pode_aumentar = amb.valor_truco_proposto < 12
-            if st.button("🔥 Aumentar", key="btn_aumentar_bottom", disabled=not pode_aumentar, use_container_width=True):
+            if st.button(
+                "🔥 Aumentar",
+                key="btn_aumentar_bottom",
+                disabled=not pode_aumentar,
+                use_container_width=True,
+            ):
                 st.session_state.resposta_humana = RespostasTruco.AUMENTAR
                 st.rerun()
         else:
             # Botão decorativo "Log da rodada"
-            st.button("📋 Log da rodada", key="btn_log_decorativo", use_container_width=True)
-            
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.button(
+                "📋 Log da rodada", key="btn_log_decorativo", use_container_width=True
+            )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
 with col_dir:
     # Painel XAI da Inteligência Artificial
@@ -663,38 +807,41 @@ with col_dir:
         xai = st.session_state.ultima_explicacao_ia
         st.markdown(f"**Estratégia Oponente:** `{xai['estrategia']}`")
         st.markdown(f"**Ação IA:** `{xai['decisao']}`")
-        
+
         # Métrica Visual da Força da Mão da IA
-        forca = xai['forca_mao']
+        forca = xai["forca_mao"]
         st.markdown(f"**Força da Mão da IA (0-10):** {forca:.2f}")
         st.progress(min(forca / 10.0, 1.0))
-        
+
         ia_agent = st.session_state.oponente_instancia
         if ia_agent and hasattr(ia_agent, "beliefs") and ia_agent.beliefs:
             b = ia_agent.beliefs
             p_manilha = b.probabilidade_manilha_oponente * 100
             perfil = b.perfil_oponente
             p_blefe = b.chance_blefe_oponente * 100
-            
+
             st.markdown(f"- P(Humano ter Manilha): **{p_manilha:.1f}%**")
             st.markdown(f"- Perfil Mapeado do Humano: **{perfil}**")
             st.markdown(f"- P(Humano Blefando | Truco): **{p_blefe:.1f}%**")
-            
+
         st.markdown("**Raciocínio Interno (Rationale):**")
-        st.info(xai['motivo'])
+        st.info(xai["motivo"])
         st.caption(f"Tempo de Decisão: {xai['tempo_ms']:.4f} ms")
     else:
         st.info("Aguardando ação da IA para exibir raciocínio.")
-        
+
     st.markdown("---")
-    
+
     # Histórico detalhado da Mão Corrente (Logs organizados)
     st.markdown("### 📜 Linha do Tempo da Mão")
     logs_mao_html = "<br>".join(st.session_state.logs_mao_atual[::-1])
-    st.markdown(f'<div class="log-container" style="max-height: 200px;">{logs_mao_html}</div>', unsafe_allow_html=True)
-    
+    st.markdown(
+        f'<div class="log-container" style="max-height: 200px;">{logs_mao_html}</div>',
+        unsafe_allow_html=True,
+    )
+
     st.markdown("---")
-    
+
     # Histórico de Mãos Anteriores
     with st.expander("📝 Histórico das Mãos Anteriores"):
         if st.session_state.maos_finalizadas_historico:
